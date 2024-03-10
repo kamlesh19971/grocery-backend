@@ -5,6 +5,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 const port = 5000;
@@ -28,6 +29,7 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model("Product", productSchema);
 
+app.use(cors());
 app.use(express.json());
 
 // Multer configuration for file uploads
