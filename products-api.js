@@ -19,13 +19,14 @@ const upload = multer({ storage });
 
 app.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, category } = req.body;
     const imageUrl = req.file.path;
 
     const newProduct = new Product({
       name,
       price,
       imageUrl,
+      category,
     });
 
     const savedProduct = await newProduct.save();
@@ -62,15 +63,25 @@ app.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { name, price } = req.body;
-
+    const { name, price, category } = req.body;
     const result = await Product.findByIdAndUpdate(
       { _id: id },
-      { $set: { name, price } },
+      { $set: { name, price, category } },
       { new: true }
     );
 
     res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.deleteOne({ _id: id });
+    res.status(200).json(product);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
