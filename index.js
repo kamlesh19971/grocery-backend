@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const db = require("./db");
+const path = require("path");
 const productApi = require("./products-api");
 
 const app = express();
@@ -16,8 +17,13 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/uploads", express.static("uploads"));
+app.use(express.static(path.join(__dirname, "build")));
 
 app.use("/api/product", productApi);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
