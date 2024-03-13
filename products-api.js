@@ -20,7 +20,7 @@ const upload = multer({ storage });
 app.post("/", upload.single("image"), async (req, res) => {
   try {
     const { name, price, category } = req.body;
-    const imageUrl = req.file.path;
+    const imageUrl = req.file ? req.file.path : "";
 
     const newProduct = new Product({
       name,
