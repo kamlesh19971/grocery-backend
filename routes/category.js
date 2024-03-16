@@ -1,6 +1,7 @@
 const express = require("express");
 
 const Category = require("../models/category");
+const Product = require("../models/product");
 const app = express.Router();
 
 app.post("/", async (req, res) => {
@@ -43,6 +44,17 @@ app.put("/:id", getCategory, async (req, res) => {
 app.delete("/:id", getCategory, async (req, res) => {
   try {
     const { id } = req.params;
+
+    const productsWithCategory = await Product.countDocuments({
+      category: id,
+    }).lean();
+
+    if (productsWithCategory) {
+      res.status(400).json({
+        message: "Couldn't delete category, because it's assigned to products",
+      });
+      return;
+    }
     await Category.deleteOne({ _id: id });
     res.json({ message: "Deleted Category" });
   } catch (err) {
