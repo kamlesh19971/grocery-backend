@@ -6,6 +6,7 @@ const db = require("./db");
 const path = require("path");
 const productApi = require("./routes/products");
 const categoryapi = require("./routes/category");
+const brandApi = require("./routes/brand");
 
 const app = express();
 const port = 5000;
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, "build")));
 
 app.use("/api/product", productApi);
 app.use("/api/category", categoryapi);
+app.use("/api/brand", brandApi);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
