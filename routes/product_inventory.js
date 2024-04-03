@@ -2,6 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const ProductInventory = require("../models/product_inventory");
+const Product = require("../models/product");
+const mongoose = require("mongoose");
 
 router.post("/", async (req, res) => {
   try {
@@ -16,25 +18,54 @@ router.post("/", async (req, res) => {
 // Get all ProductInventories
 router.get("/", async (req, res) => {
   try {
-    let { product_id, brand_id, skip, limit } = req.query;
+    const productId = new mongoose.Types.ObjectId(req.query.product_id); // Convert productId to ObjectId
+    const productInventory = await ProductInventory.aggregate([
+      {
+        $match: {
+          product_id: productId,
+        },
+      },
+      {
+        $group: {
+          _id: "$brand_id",
+          product_id: { $first: "$product_id" },
+          productInventory: {
+            $push: {
+              _id: "$_id",
+              quantity: "$quantity",
+              price: "$price",
+              unit: "$unit",
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "_id",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      {
+        $unwind: "$brand",
+      },
+      {
+        $project: {
+          _id: 0,
+          brand: "$brand",
+          productInventory: 1,
+        },
+      },
+    ]);
 
-    let query = {};
+    const product = await Product.findById(req.query.product_id)
+      .select("name")
+      .lean();
 
-    if (product_id) {
-      query["product_id"] = product_id;
-    }
-    if (brand_id) {
-      query["brand_id"] = brand_id;
-    }
-
-    skip = parseInt(skip) || 0;
-    limit = parseInt(limit) || 10;
-
-    const productInventories = await ProductInventory.find(query)
-      .skip(skip)
-      .limit(limit);
-    res.json(productInventories);
+    res.json({ productInventory, product });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 });
