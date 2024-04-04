@@ -57,6 +57,9 @@ router.get("/", async (req, res) => {
           productInventory: 1,
         },
       },
+      {
+        $sort: { "brand.name": 1 },
+      },
     ]);
 
     const product = await Product.findById(req.query.product_id)
