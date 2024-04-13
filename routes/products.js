@@ -40,7 +40,27 @@ app.post("/", upload.single("image"), async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "productinventories",
+          localField: "_id",
+          foreignField: "product_id",
+          as: "inventory",
+        },
+      },
+      {
+        $unwind: "$inventory",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          price: { $min: "$inventory.price" },
+          imageUrl: { $first: "$imageUrl" },
+        },
+      },
+    ]);
     res.json(products);
   } catch (error) {
     console.error(error);

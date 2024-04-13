@@ -18,12 +18,21 @@ router.post("/", async (req, res) => {
 // Get all ProductInventories
 router.get("/", async (req, res) => {
   try {
-    const productId = new mongoose.Types.ObjectId(req.query.product_id); // Convert productId to ObjectId
+    let { product_id, brand_id, skip, limit } = req.query;
+    let query = {};
+
+    skip = parseInt(skip) || 0;
+    limit = parseInt(limit) || 10;
+
+    if (product_id) {
+      query["product_id"] = new mongoose.Types.ObjectId(req.query.product_id);
+    }
+    if (brand_id) {
+      query["brand_id"] = new mongoose.Types.ObjectId(req.query.brand_id);
+    }
     const productInventory = await ProductInventory.aggregate([
       {
-        $match: {
-          product_id: productId,
-        },
+        $match: query,
       },
       {
         $group: {
@@ -60,11 +69,13 @@ router.get("/", async (req, res) => {
       {
         $sort: { "brand.name": 1 },
       },
+      {
+        $skip: skip,
+      },
+      { $limit: limit },
     ]);
 
-    const product = await Product.findById(req.query.product_id)
-      .select("name")
-      .lean();
+    const product = await Product.findById(product_id).select("name").lean();
 
     res.json({ productInventory, product });
   } catch (err) {
