@@ -53,13 +53,24 @@ app.get("/", async (req, res) => {
         },
       },
       {
-        $unwind: "$inventory",
+        $unwind: {
+          path: "$inventory",
+          preserveNullAndEmptyArrays: true, // Preserve documents that do not match the $lookup
+        },
       },
       {
         $group: {
           _id: "$_id",
           name: { $first: "$name" },
-          price: { $min: "$inventory.price" },
+          price: {
+            $min: {
+              $cond: {
+                if: { $gt: ["$inventory", null] }, // Check if inventory exists
+                then: "$inventory.price", // If inventory price exists, use it
+                else: "$price", // Otherwise, use the product price
+              },
+            },
+          },
           imageUrl: { $first: "$imageUrl" },
         },
       },
