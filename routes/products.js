@@ -3,6 +3,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const Product = require("../models/product");
+const { pagination } = require("../helper/query");
 const app = express.Router();
 
 const storage = multer.diskStorage({
@@ -40,7 +41,9 @@ app.post("/", upload.single("image"), async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
+    const { page, perPage } = req.query;
     const products = await Product.aggregate([
+      ...pagination({ page, perPage }),
       {
         $lookup: {
           from: "productinventories",

@@ -4,6 +4,7 @@ const router = express.Router();
 const ProductInventory = require("../models/product_inventory");
 const Product = require("../models/product");
 const mongoose = require("mongoose");
+const { pagination } = require("../helper/query");
 
 router.post("/", async (req, res) => {
   try {
@@ -18,11 +19,8 @@ router.post("/", async (req, res) => {
 // Get all ProductInventories
 router.get("/", async (req, res) => {
   try {
-    let { product_id, brand_id, skip, limit } = req.query;
+    let { product_id, brand_id, page, perPage } = req.query;
     let query = {};
-
-    skip = parseInt(skip) || 0;
-    limit = parseInt(limit) || 10;
 
     if (product_id) {
       query["product_id"] = new mongoose.Types.ObjectId(req.query.product_id);
@@ -66,13 +64,12 @@ router.get("/", async (req, res) => {
           productInventory: 1,
         },
       },
-      {
-        $sort: { "brand.name": 1 },
-      },
-      {
-        $skip: skip,
-      },
-      { $limit: limit },
+      ...pagination({
+        sortOrder: 1,
+        sortField: "brand.name",
+        page,
+        perPage,
+      }),
     ]);
 
     const product = await Product.findById(product_id).select("name").lean();
