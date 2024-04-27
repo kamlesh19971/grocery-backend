@@ -43,7 +43,7 @@ app.get("/", async (req, res) => {
   try {
     const { page, perPage } = req.query;
     const products = await Product.aggregate([
-      ...pagination({ page, perPage }),
+      ...pagination({ page, perPage, sortField: "name", sortOrder: 1 }),
       {
         $lookup: {
           from: "productinventories",
