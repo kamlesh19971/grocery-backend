@@ -9,6 +9,7 @@ const categoryapi = require("./routes/category");
 const brandApi = require("./routes/brand");
 const productInventoryApi = require("./routes/product_inventory");
 const cartApi = require("./routes/cart");
+const orderApi = require("./routes/order");
 
 const app = express();
 const port = 5000;
@@ -28,6 +29,7 @@ app.use("/api/cart", cartApi);
 app.use("/api/category", categoryapi);
 app.use("/api/product_inventory", productInventoryApi);
 app.use("/api/product", productApi);
+app.use("/api/order", orderApi);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
