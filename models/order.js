@@ -20,7 +20,11 @@ const orderSchema = new mongoose.Schema({
   postalCode: { type: String, required: true },
   address: { type: String, required: true },
   total: { type: Number, required: true },
-  created_date: { type: Date, default: Date.now },
+  // created_date: { type: Date, default: Date.now },
+  created_date: {
+    type: Date,
+    default: () => new Date().toISOString().split("T")[0],
+  },
   items: { type: [itemSchema], required: true },
 });
 

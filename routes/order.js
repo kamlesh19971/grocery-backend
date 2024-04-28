@@ -40,6 +40,7 @@ router.get("/", async (req, res) => {
     perPage = parseInt(perPage);
 
     const orders = await Order.find(filters)
+      .sort({ created_at: -1 })
       .skip(page * perPage)
       .limit(perPage)
       .lean();
