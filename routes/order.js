@@ -2,10 +2,17 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/order");
 
+const createOrderId = async () => {
+  const count = await Order.countDocuments();
+  return count === 0 ? `100001` : `${count + 1}`;
+};
+
 // Create a new order
 router.post("/", async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const { body } = req;
+    const orderId = await createOrderId();
+    const order = new Order({ ...body, orderId });
     await order.save();
     res.status(201).send(order);
   } catch (error) {
